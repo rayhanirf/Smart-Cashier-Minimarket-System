@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Monitoring Dashboard - Kasir System</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.27.2/dist/axios.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .navbar {
+            background: rgba(20, 20, 40, 0.95);
+            padding: 1rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-brand {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logout-btn {
+            background: #e74c3c;
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+
+        .header {
+            color: white;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        /* DASHBOARD GRID */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* SUMMARY CARDS */
+        .summary-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .summary-card-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-card-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .summary-card-unit {
+            font-size: 0.85rem;
+            color: #95a5a6;
+        }
+
+        .summary-card.danger {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .summary-card.success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .summary-card.info {
+            border-left: 4px solid #3498db;
+        }
+
+        .summary-card.warning {
+            border-left: 4px solid #f39c12;
+        }
+
+        /* CHARTS SECTION */
+        .charts-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-size: 1.1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        /* DATA TABLES */
+        .data-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .data-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .data-card h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            font-size: 1.1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            padding: 0.8rem;
+            text-align: left;
+            font-weight: 600;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+        }
+
+        .data-table td {
+            padding: 0.8rem;
+            border-bottom: 1px solid #ecf0f1;
+        }
+
+        .data-table tr:hover {
+            background: #f9f9f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-danger {
+            background: #fadbd8;
+            color: #c0392b;
+        }
+
+        .badge-warning {
+            background: #fdeaa8;
+            color: #d68910;
+        }
+
+        .badge-success {
+            background: #d5f4e6;
+            color: #186a3b;
+        }
+
+        .badge-info {
+            background: #d6eaf8;
+            color: #154360;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 0.8rem;
+            }
+
+            .summary-card {
+                padding: 1rem;
+            }
+
+            .summary-card-value {
+                font-size: 1.5rem;
+            }
+
+            .charts-section,
+            .data-section {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .navbar {
+                padding: 0.8rem;
+            }
+
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .data-table {
+                font-size: 0.8rem;
+            }
+
+            .data-table th,
+            .data-table td {
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .navbar {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .navbar-brand {
+                width: 100%;
+                text-align: center;
+            }
+
+            .container {
+                padding: 0.5rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-card-value {
+                font-size: 1.3rem;
+            }
+
+            .header h1 {
+                font-size: 1.3rem;
+            }
+        }
+
+        /* LOADING & ERROR STATES */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fadbd8;
+            color: #c0392b;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #c0392b;
+        }
+
+        .success-message {
+            background: #d5f4e6;
+            color: #186a3b;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #27ae60;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: #2c3e50;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #2c3e50;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #bdc3c7;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        .no-data {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="navbar-brand">📊 Owner Dashboard</div>
+        <div class="navbar-user">
+            <span id="username">Loading...</span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <div class="header">
+            <h1>Dashboard Penjualan & Inventory</h1>
+            <p id="current-date">Loading...</p>
+        </div>
+
+        <!-- SUMMARY CARDS -->
+        <div class="dashboard-grid">
+            <div class="summary-card success">
+                <div class="summary-card-label">Total Penjualan Hari Ini</div>
+                <div class="summary-card-value" id="total-sales">Rp 0</div>
+                <div class="summary-card-unit">IDR</div>
+            </div>
+            <div class="summary-card info">
+                <div class="summary-card-label">Jumlah Transaksi</div>
+                <div class="summary-card-value" id="total-transactions">0</div>
+                <div class="summary-card-unit">transaksi</div>
+            </div>
+            <div class="summary-card info">
+                <div class="summary-card-label">Item Terjual</div>
+                <div class="summary-card-value" id="total-items">0</div>
+                <div class="summary-card-unit">unit</div>
+            </div>
+            <div class="summary-card info">
+                <div class="summary-card-label">Total Produk</div>
+                <div class="summary-card-value" id="total-products">0</div>
+                <div class="summary-card-unit">produk</div>
+            </div>
+            <div class="summary-card info">
+                <div class="summary-card-label">Total Stok</div>
+                <div class="summary-card-value" id="total-stock">0</div>
+                <div class="summary-card-unit">unit</div>
+            </div>
+            <div class="summary-card danger">
+                <div class="summary-card-label">Stok Rendah</div>
+                <div class="summary-card-value" id="low-stock">0</div>
+                <div class="summary-card-unit">produk</div>
+            </div>
+        </div>
+
+        <!-- CHARTS SECTION -->
+        <div class="charts-section">
+            <div class="chart-card">
+                <h3>📈 Grafik Penjualan (7 Hari)</h3>
+                <div class="chart-container">
+                    <canvas id="sales-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>💳 Metode Pembayaran</h3>
+                <div class="chart-container">
+                    <canvas id="payment-chart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-card">
+                <h3>📦 Kategori Produk</h3>
+                <div class="chart-container">
+                    <canvas id="inventory-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- DATA TABLES SECTION -->
+        <div class="data-section">
+            <div class="data-card">
+                <h3>🔴 Produk Stok Rendah</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>Stok</th>
+                            <th>Harga</th>
+                        </tr>
+                    </thead>
+                    <tbody id="low-stock-table">
+                        <tr>
+                            <td colspan="3" class="no-data">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-card">
+                <h3>⭐ Produk Terlaris (7 Hari)</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Produk</th>
+                            <th>Terjual</th>
+                            <th>Kategori</th>
+                        </tr>
+                    </thead>
+                    <tbody id="top-selling-table">
+                        <tr>
+                            <td colspan="3" class="no-data">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="data-card">
+                <h3>💰 Transaksi Hari Ini</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Waktu</th>
+                            <th>Total</th>
+                            <th>Metode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="today-transactions-table">
+                        <tr>
+                            <td colspan="3" class="no-data">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script>
+        // API Base URL - Sesuaikan dengan IP server Anda
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        let salesChartInstance = null;
+        let paymentChartInstance = null;
+        let inventoryChartInstance = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCurrentDate();
+            loadDashboardData();
+            
+            // Refresh data setiap 30 detik
+            setInterval(loadDashboardData, 30000);
+        });
+
+        // Update tanggal saat ini
+        function updateCurrentDate() {
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('current-date').textContent = 
+                today.toLocaleDateString('id-ID', options);
+        }
+
+        // Load semua data dashboard
+        async function loadDashboardData() {
+            try {
+                // Parallel load semua data
+                const [summary, sales, lowStock, topSelling, payments, inventory, todayTransactions] = await Promise.all([
+                    axios.get(`${API_BASE_URL}/dashboard/summary`),
+                    axios.get(`${API_BASE_URL}/sales/chart?days=7`),
+                    axios.get(`${API_BASE_URL}/products/low-stock`),
+                    axios.get(`${API_BASE_URL}/products/top-selling`),
+                    axios.get(`${API_BASE_URL}/payment/breakdown?days=7`),
+                    axios.get(`${API_BASE_URL}/inventory/summary`),
+                    axios.get(`${API_BASE_URL}/sales/today`)
+                ]);
+
+                // Update summary cards
+                if (summary.data.success) {
+                    const data = summary.data.data;
+                    document.getElementById('total-sales').textContent = 
+                        'Rp ' + formatNumber(data.total_sales);
+                    document.getElementById('total-transactions').textContent = data.total_transactions;
+                    document.getElementById('total-items').textContent = data.total_items_sold;
+                    document.getElementById('total-products').textContent = data.total_products;
+                    document.getElementById('total-stock').textContent = data.total_stock;
+                    document.getElementById('low-stock').textContent = data.low_stock_products;
+                }
+
+                // Update charts
+                if (sales.data.success) {
+                    updateSalesChart(sales.data.data);
+                }
+
+                if (payments.data.success) {
+                    updatePaymentChart(payments.data.data);
+                }
+
+                if (inventory.data.success) {
+                    updateInventoryChart(inventory.data.data);
+                }
+
+                // Update tables
+                if (lowStock.data.success) {
+                    updateLowStockTable(lowStock.data.data);
+                }
+
+                if (topSelling.data.success) {
+                    updateTopSellingTable(topSelling.data.data);
+                }
+
+                if (todayTransactions.data.success) {
+                    updateTodayTransactionsTable(todayTransactions.data.data);
+                }
+
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Format number to currency
+        function formatNumber(num) {
+            return Math.round(num).toLocaleString('id-ID');
+        }
+
+        // Update Sales Chart
+        function updateSalesChart(data) {
+            const ctx = document.getElementById('sales-chart').getContext('2d');
+            const labels = data.map(d => new Date(d.date).toLocaleDateString('id-ID'));
+            const values = data.map(d => Math.round(d.sales));
+
+            if (salesChartInstance) {
+                salesChartInstance.destroy();
+            }
+
+            salesChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Penjualan (IDR)',
+                        data: values,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointBackgroundColor: '#667eea',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'Rp ' + formatNumber(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Payment Chart
+        function updatePaymentChart(data) {
+            const ctx = document.getElementById('payment-chart').getContext('2d');
+            const labels = data.map(d => d.method);
+            const values = data.map(d => d.total);
+
+            if (paymentChartInstance) {
+                paymentChartInstance.destroy();
+            }
+
+            paymentChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#4facfe',
+                            '#00f2fe'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Inventory Chart
+        function updateInventoryChart(data) {
+            const ctx = document.getElementById('inventory-chart').getContext('2d');
+            const labels = data.map(d => d.category);
+            const values = data.map(d => d.total_stock);
+
+            if (inventoryChartInstance) {
+                inventoryChartInstance.destroy();
+            }
+
+            inventoryChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Stok',
+                        data: values,
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#4facfe',
+                            '#00f2fe'
+                        ],
+                        borderRadius: 5,
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update Low Stock Table
+        function updateLowStockTable(data) {
+            const tbody = document.getElementById('low-stock-table');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="no-data">Semua produk dalam kondisi stok baik</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map(product => `
+                <tr>
+                    <td>${product.name}</td>
+                    <td><span class="badge badge-danger">${product.stock} unit</span></td>
+                    <td>Rp ${formatNumber(product.price)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update Top Selling Table
+        function updateTopSellingTable(data) {
+            const tbody = document.getElementById('top-selling-table');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="no-data">Tidak ada data penjualan</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map((product, index) => `
+                <tr>
+                    <td>${index + 1}. ${product.name}</td>
+                    <td><span class="badge badge-success">${product.sold} unit</span></td>
+                    <td>${product.category || '-'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Update Today Transactions Table
+        function updateTodayTransactionsTable(data) {
+            const tbody = document.getElementById('today-transactions-table');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="no-data">Tidak ada transaksi hari ini</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.slice(0, 10).map(transaction => `
+                <tr>
+                    <td>${transaction.time}</td>
+                    <td>Rp ${formatNumber(transaction.amount)}</td>
+                    <td><span class="badge badge-info">${transaction.payment_method || 'cash'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await axios.post(`${API_BASE_URL}/auth/logout`);
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Gagal logout');
+            }
+        }
+    </script>
+</body>
+</html>

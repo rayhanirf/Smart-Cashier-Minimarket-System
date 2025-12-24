@@ -1,0 +1,335 @@
+<!DOCTYPE html> 
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Owner Monitoring System</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+    --bg1:#020617;
+    --bg2:#020024;
+    --card1:#1e293b;
+    --card2:#0f172a;
+    --border:rgba(255,255,255,.18);
+    --primary:#7c7cff;
+    --success:#22c55e;
+    --warning:#facc15;
+    --text:#f8fafc;
+    --muted:#9ca3af;
+    --shadow:0 30px 70px rgba(0,0,0,.65);
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Inter,sans-serif;
+}
+
+body{
+    background:
+        radial-gradient(circle at top left,#1e293b,transparent 60%),
+        linear-gradient(180deg,var(--bg2),var(--bg1));
+    color:var(--text);
+    padding:28px;
+}
+
+/* ================= HEADER ================= */
+.header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+.header h1{
+    font-size:32px;
+    font-weight:800;
+}
+.header small{
+    color:var(--muted);
+    font-size:13px;
+}
+.status{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    font-weight:600;
+}
+.status span{
+    width:10px;
+    height:10px;
+    background:var(--success);
+    border-radius:50%;
+    animation:pulse 1.5s infinite;
+}
+@keyframes pulse{
+    0%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}
+    70%{box-shadow:0 0 0 12px rgba(34,197,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+}
+
+/* ================= GRID ================= */
+.dashboard{
+    display:grid;
+    grid-template-columns:repeat(12,1fr);
+    gap:24px;
+}
+
+/* ================= CARD ================= */
+.card{
+    background:
+        linear-gradient(145deg,rgba(255,255,255,.15),rgba(255,255,255,.03)),
+        linear-gradient(180deg,var(--card1),var(--card2));
+    backdrop-filter:blur(20px);
+    border:1px solid var(--border);
+    border-radius:22px;
+    padding:26px;
+    box-shadow:var(--shadow);
+    transition:.35s;
+}
+.card:hover{
+    transform:translateY(-5px);
+    box-shadow:0 45px 100px rgba(0,0,0,.75);
+}
+
+/* ================= SUMMARY ================= */
+.summary{
+    grid-column:span 3;
+}
+.summary h4{
+    font-size:12px;
+    color:var(--muted);
+    letter-spacing:1px;
+    text-transform:uppercase;
+    margin-bottom:12px;
+}
+.summary .value{
+    font-size:34px;
+    font-weight:800;
+    line-height:1.1;
+}
+.summary small{
+    font-size:12px;
+    color:var(--muted);
+}
+
+.success{color:var(--success);}
+.warning{color:var(--warning);}
+
+/* ================= CHART ================= */
+.chart-card{
+    grid-column:span 12;
+    height:460px;
+}
+.chart-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:14px;
+}
+.chart-header h2{
+    font-size:18px;
+}
+canvas{
+    width:100%!important;
+    height:100%!important;
+}
+
+/* ================= TABLE ================= */
+.table-card{
+    grid-column:span 12;
+}
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+thead{
+    background:rgba(255,255,255,.06);
+}
+th,td{
+    padding:14px;
+    font-size:14px;
+}
+th{
+    text-transform:uppercase;
+    font-size:12px;
+    color:var(--muted);
+}
+tr{
+    border-bottom:1px solid var(--border);
+}
+tr:hover{
+    background:rgba(255,255,255,.05);
+}
+.price{
+    color:var(--success);
+    font-weight:700;
+}
+.empty{
+    text-align:center;
+    padding:30px;
+    color:var(--muted);
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:900px){
+    .summary{grid-column:span 6;}
+}
+
+@media(max-width:600px){
+    body{padding:16px;}
+    .header h1{font-size:22px;}
+
+    /* 2x2 summary */
+    .summary{grid-column:span 6;}
+
+    /* ✅ FIX FINAL: ANGKA TIDAK TERPOTONG */
+    .summary .value{
+        font-size:clamp(16px, 4vw, 20px);
+        line-height:1.2;
+        white-space:nowrap;
+    }
+
+    .summary h4{font-size:11px;}
+    .summary small{font-size:11px;}
+
+    .chart-card{height:340px;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div>
+        <h1>Owner Monitoring System</h1>
+        <small>Smart Cashier • Real-time Analytics</small>
+    </div>
+    <div class="status"><span></span> ONLINE</div>
+</div>
+
+<div class="dashboard">
+
+    <div class="card summary">
+        <h4>Penjualan Hari Ini</h4>
+        <div class="value success" id="todaySales">Rp 0</div>
+        <small>Dari grafik</small>
+    </div>
+
+    <div class="card summary">
+        <h4>Pendapatan Mingguan</h4>
+        <div class="value" id="weekSales">Rp 0</div>
+        <small>7 hari</small>
+    </div>
+
+    <div class="card summary">
+        <h4>Total Transaksi</h4>
+        <div class="value warning" id="totalTrans">0</div>
+        <small>Hari ini</small>
+    </div>
+
+    <div class="card summary">
+        <h4>Rata-rata Transaksi</h4>
+        <div class="value" id="avgTrans">Rp 0</div>
+        <small>Per transaksi</small>
+    </div>
+
+    <div class="card chart-card">
+        <div class="chart-header">
+            <h2>Grafik Penjualan 7 Hari</h2>
+            <small>Auto refresh</small>
+        </div>
+        <canvas id="chart"></canvas>
+    </div>
+
+    <div class="card table-card">
+        <div class="chart-header">
+            <h2>Transaksi Hari Ini</h2>
+            <small>Live</small>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Waktu</th>
+                    <th>Item</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="transaksi"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<script>
+const API = `${location.origin}/api`;
+let chart;
+
+const rp = v => new Intl.NumberFormat("id-ID",{
+    style:"currency",
+    currency:"IDR",
+    minimumFractionDigits:0
+}).format(v);
+
+async function loadChart(){
+    const r = await fetch(`${API}/chart-7days`);
+    const j = await r.json();
+    const d = j.data;
+
+    const today = d.at(-1).sales;
+    const totalWeek = d.reduce((s,x)=>s+x.sales,0);
+
+    document.getElementById("todaySales").innerText = rp(today);
+    document.getElementById("weekSales").innerText = rp(totalWeek);
+
+    chart && chart.destroy();
+    chart = new Chart(document.getElementById("chart"),{
+        type:"bar",
+        data:{
+            labels:d.map(x=>new Date(x.date).toLocaleDateString("id-ID",{weekday:"short"})),
+            datasets:[{
+                data:d.map(x=>x.sales),
+                backgroundColor:d.map((_,i)=>i===6?"#22c55e":"#7c7cff"),
+                borderRadius:14
+            }]
+        },
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}}
+        }
+    });
+}
+
+async function loadTransaksi(){
+    const r = await fetch(`${API}/today`);
+    const j = await r.json();
+    const t = j.data;
+    const tb = document.getElementById("transaksi");
+
+    document.getElementById("totalTrans").innerText = t.length;
+    document.getElementById("avgTrans").innerText =
+        t.length ? rp(t.reduce((s,x)=>s+x.total,0)/t.length) : rp(0);
+
+    tb.innerHTML = t.length
+        ? t.map(x=>`
+            <tr>
+                <td>${x.time}</td>
+                <td>${x.items_count}</td>
+                <td class="price">${rp(x.total)}</td>
+            </tr>`).join("")
+        : `<tr><td colspan="3" class="empty">Belum ada transaksi</td></tr>`;
+}
+
+loadChart();
+loadTransaksi();
+setInterval(()=>{loadChart();loadTransaksi();},10000);
+</script>
+
+</body>
+</html>
