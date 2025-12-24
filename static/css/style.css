@@ -1,0 +1,557 @@
+/* ============================================
+   OWNER MONITORING SYSTEM - MOBILE RESPONSIVE CSS
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f5f7fa;
+    color: #2c3e50;
+    overflow-x: hidden;
+}
+
+/* ============ APP CONTAINER ============ */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-height: 100dvh; /* Dynamic viewport height untuk mobile */
+}
+
+/* ============ HEADER ============ */
+.app-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 16px;
+    padding-top: max(15px, env(safe-area-inset-top));
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-section {
+    flex: 1;
+    min-width: 0;
+}
+
+.logo-section h1 {
+    font-size: 20px;
+    margin-bottom: 3px;
+}
+
+.date-time {
+    font-size: 12px;
+    opacity: 0.9;
+    display: block;
+}
+
+.btn-logout {
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-logout:active {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(0.95);
+}
+
+/* ============ NAVIGATION ============ */
+.bottom-nav {
+    display: flex;
+    background: white;
+    border-top: 1px solid #ecf0f1;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(0px, env(safe-area-inset-bottom));
+}
+
+.nav-btn {
+    flex: 1;
+    padding: 12px 8px;
+    background: white;
+    border: none;
+    color: #7f8c8d;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    border-bottom: 3px solid transparent;
+    min-width: 60px;
+}
+
+.nav-btn:active {
+    background: #f8f9fa;
+}
+
+.nav-btn.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+}
+
+/* ============ MAIN CONTENT ============ */
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: max(20px, env(safe-area-inset-bottom));
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.container {
+    padding: 16px;
+    padding-top: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+h2 {
+    font-size: 20px;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+h3 {
+    font-size: 16px;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+/* ============ CARDS GRID ============ */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.card-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.card-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.card-content p {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-bottom: 4px;
+}
+
+.card-content h3 {
+    font-size: 18px;
+    color: #2c3e50;
+    margin: 0;
+    word-break: break-word;
+}
+
+@media (min-width: 768px) {
+    .cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+    }
+}
+
+/* ============ CHARTS ============ */
+.chart-container {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+
+/* ============ SECTIONS ============ */
+.section {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* ============ TABLES ============ */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+thead {
+    background: #f8f9fa;
+}
+
+th {
+    padding: 12px 8px;
+    text-align: left;
+    font-weight: 600;
+    color: #2c3e50;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+tr:hover {
+    background: #f8f9fa;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.badge-danger {
+    background: #fee;
+    color: #c33;
+}
+
+.badge-warning {
+    background: #ffeaa7;
+    color: #d63031;
+}
+
+.badge-success {
+    background: #efe;
+    color: #27ae60;
+}
+
+/* ============ FILTERS & BUTTONS ============ */
+.filter-section {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-section label {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.filter-section input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #ecf0f1;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.btn-refresh,
+.btn-logout {
+    transition: all 0.2s ease;
+}
+
+.btn-refresh {
+    padding: 10px 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.btn-refresh:active {
+    transform: scale(0.95);
+}
+
+/* ============ LOADING ============ */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ============ SCROLLBAR ============ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #999;
+}
+
+/* ============ RESPONSIVE BREAKPOINTS ============ */
+@media (max-width: 480px) {
+    .container {
+        padding: 12px;
+    }
+
+    .cards-grid {
+        gap: 8px;
+    }
+
+    .card {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .card-icon {
+        font-size: 24px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    th, td {
+        padding: 8px 6px;
+    }
+
+    .filter-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .filter-section input[type="date"] {
+        width: 100%;
+    }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+    .cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 769px) {
+    .cards-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .container {
+        padding: 24px;
+    }
+
+    .filter-section {
+        justify-content: flex-start;
+    }
+}
+
+/* ============ LANDSCAPE MODE ============ */
+@media (orientation: landscape) and (max-height: 500px) {
+    .app-header {
+        padding: 10px 16px;
+    }
+
+    .logo-section h1 {
+        font-size: 16px;
+    }
+
+    .nav-btn {
+        padding: 8px 6px;
+        font-size: 11px;
+    }
+
+    .container {
+        padding: 10px;
+    }
+
+    .cards-grid {
+        gap: 8px;
+    }
+
+    .chart-container {
+        padding: 10px;
+    }
+}
+
+/* ============ PRINT STYLES ============ */
+@media print {
+    .app-header,
+    .bottom-nav,
+    .filter-section {
+        display: none;
+    }
+
+    .main-content {
+        padding: 0;
+        height: auto;
+        overflow: visible;
+    }
+
+    .tab-content {
+        display: block !important;
+        page-break-inside: avoid;
+    }
+}
+
+/* ============ DARK MODE SUPPORT ============ */
+@media (prefers-color-scheme: dark) {
+    html, body {
+        background: #1a1a1a;
+        color: #e0e0e0;
+    }
+
+    .app-header {
+        background: linear-gradient(135deg, #4a5568 0%, #5a3f7a 100%);
+    }
+
+    .card,
+    .section,
+    .chart-container,
+    .filter-section {
+        background: #2a2a2a;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .bottom-nav {
+        background: #2a2a2a;
+        border-top-color: #444;
+    }
+
+    .nav-btn {
+        background: #2a2a2a;
+        color: #999;
+    }
+
+    .nav-btn:active {
+        background: #333;
+    }
+
+    .nav-btn.active {
+        color: #a78bfa;
+    }
+
+    th {
+        background: #333;
+        color: #e0e0e0;
+    }
+
+    tr:hover {
+        background: #333;
+    }
+
+    table {
+        color: #e0e0e0;
+    }
+}
+
+/* ============ SAFE AREA SUPPORT ============ */
+@supports (padding: max(0px)) {
+    .app-header {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+
+    .container {
+        padding-left: max(16px, env(safe-area-inset-left));
+        padding-right: max(16px, env(safe-area-inset-right));
+    }
+}
